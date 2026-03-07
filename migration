@@ -1,0 +1,38 @@
+#/bin/sh
+
+RED='\e[31m'
+GREEN='\e[32m'
+YELLOW='\e[33m'
+BOLD_BLUE='\e[1;34m'
+UNDERLINED_CYAN='\e[4;36m'
+MAGENTA_ON_YELLOW='\e[1;35;43m'
+Blue='\e[34m'
+Magenta='\e[35m'
+Cyan='\e[36m'
+White='\e[37m'
+NC='\e[0m' # No Color
+
+if [ -z "$1" ]; then
+    echo "${RED}The migration file from migration folder is either empty or not provided.${NC}"
+    # You can add an exit command here if the parameter is mandatory
+    exit 1 
+fi
+
+
+if [ -z "$2" ]; then
+    echo "${RED}The migration status up/down provided.${NC}"
+    # You can add an exit command here if the parameter is mandatory
+    exit 1 
+fi
+
+MIGRATION_PATH="$1"
+MIGRATION_STATUS="$2"
+
+# sourcing .env
+source $(pwd)/.env
+
+echo "${GREEN}running migration:${MIGRATION_STATUS} on ${PG_USER}@${PG_HOST}:${PG_PORT} database : ${PG_DATABASE}${NC}"
+
+echo "running:\n"
+
+migrate -database "postgres://${PG_USER}:${PG_PASSWORD}@${PG_HOST}:${PG_PORT}/${PG_DATABASE}?sslmode=disable" -path $MIGRATION_PATH $MIGRATION_STATUS

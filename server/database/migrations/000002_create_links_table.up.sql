@@ -1,0 +1,19 @@
+CREATE TABLE IF NOT EXISTS tags (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    name VARCHAR(100) NOT NULL UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS links (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    link TEXT NOT NULL,
+    name VARCHAR(150) NOT NULL,
+    link_desc VARCHAR(200) NULL
+);
+
+CREATE TABLE IF NOT EXISTS link_tags (
+    link_id UUID NOT NULL REFERENCES links(id) ON DELETE CASCADE,
+    tag_id  UUID NOT NULL REFERENCES tags(id)  ON DELETE CASCADE,
+    PRIMARY KEY (link_id, tag_id)
+);
