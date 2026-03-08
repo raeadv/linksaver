@@ -7,6 +7,7 @@ import { NButton, NCard, NForm, NFormItem, NInput, NInputGroup, NModal, NSelect 
 import { reactive, ref } from 'vue';
 import z from 'zod';
 
+const emit = defineEmits(['link-created'])
 const { message, loading } = appUtils()
 const showModal = ref(false)
 const formRef = ref()
@@ -25,6 +26,7 @@ const addLink = async () => {
     if (status === 201) {
         message.success(`new link added`)
         showModal.value = false
+        emit('link-created', null)
     } else {
         message.error(`failed to add link`)
         return
