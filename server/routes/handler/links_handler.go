@@ -29,8 +29,9 @@ func HandleGetLinks(gc *gin.Context) {
 		return
 	}
 
-	basequery := database.DB.Model(&database.Link{})
+	fmt.Println("query string", queryString)
 
+	basequery := database.DB.Model(&database.Link{})
 	if queryString.Keyword != "" {
 		pattern := "%" + queryString.Keyword + "%"
 		basequery.Where(
@@ -38,16 +39,36 @@ func HandleGetLinks(gc *gin.Context) {
 		)
 	}
 
+	var userId pgtype.UUID
+	ctxId, _ := gc.Get("ID")
+	err = userId.Scan(ctxId)
+	if err != nil {
+		gc.JSON(http.StatusInternalServerError, gin.H{
+			"status":  false,
+			"message": "Failed to associate User ID to tag",
+			"error":   fmt.Sprintf("%#v/n", err),
+			"id":      ctxId,
+		})
+		return
+	}
+	basequery.Where("user_id = ?", userId)
+
 	offset := (queryString.Page - 1) * queryString.Limit
 
 	var total int64
-	var links database.Link
+	var links []database.Link
 	basequery.Count(&total)
-	result := basequery.Preload("LinkTags").Offset(offset).Limit(queryString.Limit).Find(&links)
+	_ = basequery.Preload("LinkTags").Offset(offset).Limit(queryString.Limit).Find(&links)
 
 	gc.JSON(http.StatusOK, gin.H{
 		"status": true,
-		"links":  result,
+		"links":  links,
+		"metadata": gin.H{
+			"page":    queryString.Page,
+			"limit":   queryString.Limit,
+			"total":   queryString.Total,
+			"keyword": queryString.Keyword,
+		},
 	})
 
 }
@@ -130,6 +151,65 @@ func HandleCreateLink(gc *gin.Context) {
 		"link":    newLink,
 	})
 
+}
+
+type LinksScrollParams struct {
+	Offset  int    `form:"offset"`
+	Limit   int    `form:"limit"`
+	Keyword string `form:"keyword"`
+}
+
+func HandleGetLinksScroll(gc *gin.Context) {
+	var queryString LinksScrollParams
+	err := gc.ShouldBindQuery(&queryString)
+	if err != nil {
+		gc.JSON(http.StatusInternalServerError, gin.H{
+			"status":  false,
+			"message": "Invalid parameter received",
+		})
+		return
+	}
+
+	if queryString.Limit <= 0 {
+		queryString.Limit = 20
+	}
+
+	basequery := database.DB.Model(&database.Link{})
+	if queryString.Keyword != "" {
+		pattern := "%" + queryString.Keyword + "%"
+		basequery.Where(
+			database.DB.Where("link ILIKE ?", pattern).Or("name ILIKE ?", pattern).Or("link_desc ILIKE ?", pattern),
+		)
+	}
+
+	var userId pgtype.UUID
+	ctxId, _ := gc.Get("ID")
+	err = userId.Scan(ctxId)
+	if err != nil {
+		gc.JSON(http.StatusInternalServerError, gin.H{
+			"status":  false,
+			"message": "Failed to associate User ID",
+			"error":   fmt.Sprintf("%#v/n", err),
+		})
+		return
+	}
+	basequery.Where("user_id = ?", userId)
+
+	var links []database.Link
+	_ = basequery.Preload("LinkTags").Offset(queryString.Offset).Limit(queryString.Limit).Find(&links)
+
+	hasMore := len(links) == queryString.Limit
+
+	gc.JSON(http.StatusOK, gin.H{
+		"status":   true,
+		"links":    links,
+		"has_more": hasMore,
+		"metadata": gin.H{
+			"offset":  queryString.Offset,
+			"limit":   queryString.Limit,
+			"keyword": queryString.Keyword,
+		},
+	})
 }
 
 func HandleGetWebsiteMeta(gc *gin.Context) {
