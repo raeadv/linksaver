@@ -23,11 +23,12 @@ type Link struct {
 	Link     string      `json:"link"`
 	Name     string      `json:"name"`
 	LinkDesc string      `json:"link_desc"`
-	// LinkTags []LinkTags  `gorm:"embedded" json:"linkTags"`
+
+	LinkTags []LinkTags `gorm:"foreignKey:link_id"`
 }
 
 type LinkTags struct {
 	LinkId pgtype.UUID `gorm:"type:uuid"`
 	TagId  pgtype.UUID `gorm:"type:uuid"`
-	Tag    Tag         `gorm:"embedded"`
+	Tag    Tag         `gorm:"foreignKey:tag_id"`
 }
