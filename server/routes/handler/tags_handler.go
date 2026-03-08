@@ -3,6 +3,7 @@ package handler
 import (
 	"fmt"
 	"linksaver/server/database"
+	"math"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -90,6 +91,8 @@ func HandleDeleteTags(gc *gin.Context) {
 
 func HandleGetTags(gc *gin.Context) {
 	var queryString PaginationQueryString
+	var userId pgtype.UUID
+
 	err := gc.ShouldBindQuery(&queryString)
 	if err != nil {
 		gc.JSON(http.StatusInternalServerError, gin.H{
@@ -99,6 +102,9 @@ func HandleGetTags(gc *gin.Context) {
 		return
 	}
 
+	fmt.Println("################### RECEIVED PARAMS")
+	fmt.Printf("%#v/n", queryString)
+
 	basequery := database.DB.Model(&database.Tag{})
 
 	if queryString.Keyword != "" {
@@ -106,30 +112,99 @@ func HandleGetTags(gc *gin.Context) {
 		basequery.Where("name ILIKE ?", pattern)
 	}
 
+	ctxId := gc.GetString("ID")
+	if ctxId == "" {
+		fmt.Println(ctxId)
+		gc.JSON(http.StatusInternalServerError, gin.H{
+			"status":  false,
+			"message": "User ID is not present",
+		})
+		return
+	}
+
+	err = userId.Scan(ctxId)
+	if err != nil {
+		gc.JSON(http.StatusInternalServerError, gin.H{
+			"status":  false,
+			"message": "Failed to associate User ID to tag",
+			"error":   fmt.Sprintf("%#v/n", err),
+			"id":      ctxId,
+		})
+		return
+	}
+
+	basequery.Where("user_id = ?", userId)
+
+	if queryString.Page < 1 {
+		queryString.Page = 1
+	}
+	if queryString.Limit < 1 {
+		queryString.Limit = 20
+	}
 	offset := (queryString.Page - 1) * queryString.Limit
 
 	var total int64
-	var tags database.Tag
+	var tags []database.Tag
 	basequery.Count(&total)
-	result := basequery.Offset(offset).Limit(queryString.Limit).Find(&tags)
+	basequery.Offset(offset).
+		Limit(queryString.Limit).
+		Find(&tags)
+
+	var pages float64 = 0
+	if total > 0 && queryString.Limit > 0 {
+		pages = math.Ceil(float64(total+int64(queryString.Limit)-1) / float64(queryString.Limit))
+	}
 
 	gc.JSON(http.StatusOK, gin.H{
 		"status": true,
-		"tags":   result,
+		"tags":   tags,
+		"metadata": gin.H{
+			"page":    queryString.Page,
+			"limit":   queryString.Limit,
+			"keyword": queryString.Keyword,
+			"pages":   pages,
+			"total":   total,
+		},
 	})
 
 }
 
 func HandleSearchTags(gc *gin.Context) {
 	var keyword string
+	var userId pgtype.UUID
 	keyword = gc.Param("query")
 	if len(keyword) < 1 {
 		return
 	}
 
+	ctxId := gc.GetString("ID")
+	if ctxId == "" {
+		fmt.Println(ctxId)
+		gc.JSON(http.StatusInternalServerError, gin.H{
+			"status":  false,
+			"message": "User ID is not present",
+		})
+		return
+	}
+
+	err := userId.Scan(ctxId)
+	if err != nil {
+		gc.JSON(http.StatusInternalServerError, gin.H{
+			"status":  false,
+			"message": "Failed to associate User ID to tag",
+			"error":   fmt.Sprintf("%#v/n", err),
+			"id":      ctxId,
+		})
+		return
+	}
+
 	var tags []database.Tag
 	pattern := "%" + keyword + "%"
-	result := database.DB.Model(&database.Tag{}).Where("name ILIKE ?", pattern).Limit(10).Find(&tags)
+	result := database.DB.Model(&database.Tag{}).
+		Where("user_id = ?", userId).
+		Where("name ILIKE ?", pattern).
+		Limit(10).
+		Find(&tags)
 
 	if result.Error != nil {
 		gc.JSON(http.StatusInternalServerError, gin.H{
