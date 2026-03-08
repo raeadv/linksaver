@@ -19,7 +19,7 @@ export default defineConfig({
   },
   build: {
     emptyOutDir: true,
-    outDir: path.resolve(__dirname, './../compiled'),
+    outDir: path.resolve(__dirname, './../compiled/html'),
     minify: true,
   }
 })
