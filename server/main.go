@@ -6,6 +6,7 @@ import (
 	"linksaver/server/database"
 	"linksaver/server/routes"
 	"log"
+	"os"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -21,6 +22,8 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 	fmt.Println("establishing db connection")
+
+	mode := os.Getenv("MODE")
 
 	var db database.Connection
 
@@ -44,6 +47,15 @@ func main() {
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization", "Access-Control-Allow-Origin"},
 		AllowCredentials: true,
 	}))
+
+	if mode == "production" {
+		g.Static("/assets", "./compiled/assets")
+		g.StaticFile("/favicon.ico", "./compiled/favicon.ico")
+		g.StaticFile("/", "./compiled/index.html")
+		g.NoRoute(func(c *gin.Context) {
+			c.File("./compiled/index.html")
+		})
+	}
 
 	// register api routes
 	api := g.Group("/api")

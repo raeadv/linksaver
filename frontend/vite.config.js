@@ -17,4 +17,9 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     },
   },
+  build: {
+    emptyOutDir: true,
+    outDir: path.resolve(__dirname, './../server/compiled'),
+    minify: true,
+  }
 })
