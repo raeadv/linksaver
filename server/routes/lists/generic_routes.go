@@ -19,6 +19,7 @@ func RegisterGenericRoutes(u *gin.RouterGroup) {
 	securedRoute.POST("/users", func(gc *gin.Context) {})
 
 	securedRoute.GET("/links", handler.HandleGetLinks)
+	securedRoute.GET("/links/scroll", handler.HandleGetLinksScroll)
 	securedRoute.GET("/links/get/web-meta", handler.HandleGetWebsiteMeta)
 	securedRoute.POST("/links", handler.HandleCreateLink)
 
