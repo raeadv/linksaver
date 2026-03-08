@@ -15,9 +15,9 @@ const store = useAuthStore()
 
 const menuOptions: MenuOption[] = [
     { label: 'Home', key: '/' },
+    { label: 'Settings', key: '/settings' },
     { label: 'Login', key: '/login' },
     { label: 'Register', key: '/register' },
-    { label: 'Links', key: '/links' },
     { label: 'Logout', key: 'logout', invoke: true },
 ];
 
