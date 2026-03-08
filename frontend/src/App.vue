@@ -22,7 +22,7 @@ watchEffect(() => {
       <nav>
         <Navigation />
       </nav>
-      <main class="w-full flex flex-col px-2 justify-center">
+      <main class="w-full flex flex-col px-2 items-center justify-center">
         <RouterView />
       </main>
     </NModalProvider>
