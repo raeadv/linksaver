@@ -62,5 +62,10 @@ func main() {
 
 	routes.RegisterApiRoute(api)
 
-	g.Run() // listens on 0.0.0.0:8080 by default
+	addr := "localhost:8080"
+	if mode == "production" {
+		addr = "0.0.0.0:80"
+	}
+
+	g.Run(addr) // listens on 0.0.0.0:8080 by default
 }
