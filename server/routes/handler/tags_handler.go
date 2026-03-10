@@ -25,7 +25,8 @@ func HandleCreateTag(gc *gin.Context) {
 	var newTagName database.Tag
 	var tagData TagData
 	var userId pgtype.UUID
-	ctxId := gc.GetString("ID")
+
+	ctxId, err := gc.Cookie("session_id")
 	if ctxId == "" {
 		fmt.Println(ctxId)
 		gc.JSON(http.StatusInternalServerError, gin.H{
@@ -35,7 +36,7 @@ func HandleCreateTag(gc *gin.Context) {
 		return
 	}
 
-	err := userId.Scan(ctxId)
+	err = userId.Scan(ctxId)
 	if err != nil {
 		gc.JSON(http.StatusInternalServerError, gin.H{
 			"status":  false,
@@ -102,9 +103,6 @@ func HandleGetTags(gc *gin.Context) {
 		return
 	}
 
-	fmt.Println("################### RECEIVED PARAMS")
-	fmt.Printf("%#v/n", queryString)
-
 	basequery := database.DB.Model(&database.Tag{})
 
 	if queryString.Keyword != "" {
@@ -112,8 +110,8 @@ func HandleGetTags(gc *gin.Context) {
 		basequery.Where("name ILIKE ?", pattern)
 	}
 
-	ctxId := gc.GetString("ID")
-	if ctxId == "" {
+	ctxId, err := gc.Cookie("session_id")
+	if ctxId == "" || err != nil {
 		fmt.Println(ctxId)
 		gc.JSON(http.StatusInternalServerError, gin.H{
 			"status":  false,
@@ -177,8 +175,8 @@ func HandleSearchTags(gc *gin.Context) {
 		return
 	}
 
-	ctxId := gc.GetString("ID")
-	if ctxId == "" {
+	ctxId, err := gc.Cookie("session_id")
+	if ctxId == "" || err != nil {
 		fmt.Println(ctxId)
 		gc.JSON(http.StatusInternalServerError, gin.H{
 			"status":  false,
@@ -187,7 +185,7 @@ func HandleSearchTags(gc *gin.Context) {
 		return
 	}
 
-	err := userId.Scan(ctxId)
+	err = userId.Scan(ctxId)
 	if err != nil {
 		gc.JSON(http.StatusInternalServerError, gin.H{
 			"status":  false,

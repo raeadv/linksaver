@@ -40,7 +40,7 @@ func HandleGetLinks(gc *gin.Context) {
 	}
 
 	var userId pgtype.UUID
-	ctxId, _ := gc.Get("ID")
+	ctxId, _ := gc.Cookie("session_id")
 	err = userId.Scan(ctxId)
 	if err != nil {
 		gc.JSON(http.StatusInternalServerError, gin.H{
@@ -93,7 +93,7 @@ func HandleCreateLink(gc *gin.Context) {
 	}
 
 	var userId pgtype.UUID
-	ctxId, _ := gc.Get("ID")
+	ctxId, _ := gc.Cookie("session_id")
 	err = userId.Scan(ctxId)
 	if err != nil {
 		gc.JSON(http.StatusInternalServerError, gin.H{
@@ -183,7 +183,7 @@ func HandleGetLinksScroll(gc *gin.Context) {
 	}
 
 	var userId pgtype.UUID
-	ctxId, _ := gc.Get("ID")
+	ctxId, _ := gc.Cookie("session_id")
 	err = userId.Scan(ctxId)
 	if err != nil {
 		gc.JSON(http.StatusInternalServerError, gin.H{

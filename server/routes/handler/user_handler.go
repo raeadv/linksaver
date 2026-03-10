@@ -48,7 +48,7 @@ func HandleLogin(gc *gin.Context) {
 		return
 	}
 
-	token, err := utils.GenerateToken(user.ID.String(), user.Username, user.Email)
+	token, err := utils.GenerateToken(gc, user.ID.String(), user.Username, user.Email)
 	if err != nil {
 		gc.JSON(http.StatusInternalServerError, gin.H{
 			"status":  false,
@@ -90,7 +90,7 @@ func HandleRegister(gc *gin.Context) {
 		return
 	}
 
-	token, err := utils.GenerateToken(newUser.ID.String(), newUser.Username, newUser.Email)
+	token, err := utils.GenerateToken(gc, newUser.ID.String(), newUser.Username, newUser.Email)
 	if err != nil {
 		gc.JSON(http.StatusInternalServerError, gin.H{
 			"status":  false,
@@ -110,17 +110,16 @@ func HandleRefreshToken(gc *gin.Context) {
 	if strToken == "" {
 		gc.JSON(http.StatusForbidden, gin.H{
 			"status":  false,
-			"message": "invalid token",
+			"message": "invalid token  [1]",
 		})
 		return
 	}
 
-	token, err := utils.ValidateToken(strToken)
-
+	token, err := utils.ValidateToken(strToken, true)
 	if err != nil {
 		gc.JSON(http.StatusForbidden, gin.H{
 			"status":  false,
-			"message": "failed to validate token",
+			"message": "failed to validate token [2]",
 		})
 		return
 	}
@@ -129,17 +128,54 @@ func HandleRefreshToken(gc *gin.Context) {
 	if !ok {
 		gc.JSON(http.StatusForbidden, gin.H{
 			"status":  false,
-			"message": "Token is invalid, please log in again",
+			"message": "Token is invalid, please log in again [3]",
 		})
 		return
 	}
 
-	newToken, err := utils.GenerateToken(claims["id"].(string), claims["username"].(string), claims["email"].(string))
+	strRefreshToken, err := utils.GetAuthSessionData(gc)
+	if err != nil {
+		gc.JSON(http.StatusForbidden, gin.H{
+			"status":  false,
+			"message": "Token is invalid, please log in again [4]",
+		})
+		return
+	}
+
+	refreshToken, err := utils.ValidateToken(strRefreshToken, false)
+	if err != nil {
+		gc.JSON(http.StatusForbidden, gin.H{
+			"status":  false,
+			"message": "failed to validate token [2]",
+		})
+		return
+	}
+
+	refreshClaims, ok := refreshToken.Claims.(jwt.MapClaims)
+	if !ok {
+		gc.JSON(http.StatusForbidden, gin.H{
+			"status":  false,
+			"message": "Token is invalid, please log in again [3]",
+		})
+		return
+	}
+
+	if claims["username"].(string) != refreshClaims["username"].(string) ||
+		claims["email"].(string) != refreshClaims["email"].(string) {
+		gc.JSON(http.StatusForbidden, gin.H{
+			"status":  false,
+			"message": "Token is invalid, please log in again [4]",
+		})
+		return
+	}
+
+	newToken, err := utils.GenerateToken(gc, refreshClaims["id"].(string), refreshClaims["username"].(string), refreshClaims["email"].(string))
 	if err != nil {
 		gc.JSON(http.StatusInternalServerError, gin.H{
 			"status":  false,
-			"message": "failed to generate new token",
+			"message": "failed to generate new token[5]",
 		})
+		return
 	}
 
 	gc.JSON(http.StatusCreated, gin.H{
