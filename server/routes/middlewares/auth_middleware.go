@@ -6,7 +6,6 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v5"
 )
 
 func MustHaveValidToken() gin.HandlerFunc {
@@ -25,8 +24,7 @@ func MustHaveValidToken() gin.HandlerFunc {
 			return
 		}
 
-		token, err := utils.ValidateToken(strToken)
-
+		_, err := utils.ValidateToken(strToken, false)
 		if err != nil {
 			gc.JSON(http.StatusForbidden, gin.H{
 				"status":  false,
@@ -34,18 +32,6 @@ func MustHaveValidToken() gin.HandlerFunc {
 			})
 			return
 		}
-
-		claims, ok := token.Claims.(jwt.MapClaims)
-		id, ok := claims["id"].(string)
-		if !ok {
-			gc.AbortWithStatusJSON(http.StatusForbidden, gin.H{
-				"status":  false,
-				"message": "invalid token id [3]",
-			})
-			return
-		}
-
-		gc.Set("ID", id)
 
 		gc.Next()
 	}
