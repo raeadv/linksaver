@@ -64,10 +64,10 @@ func main() {
 
 	routes.RegisterApiRoute(api)
 
-	addr := os.Getenv("API_URL")
 	if mode == "production" {
-		addr = "0.0.0.0:8080"
+		g.Run(os.Getenv("API_PORT")) // listens based by .env
+	} else {
+		g.Run() // listens on 0.0.0.0:8080 by default
 	}
 
-	g.Run(addr) // listens on 0.0.0.0:8080 by default
 }
