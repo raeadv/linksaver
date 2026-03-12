@@ -13,16 +13,18 @@ const user = computed(() => store?.userdata || null)
     <div v-if="user">
         <NCard title="User Info">
             <table>
-                <tr>
-                    <th align="left">Username</th>
-                    <th>:</th>
-                    <td>{{ user?.username }}</td>
-                </tr>
-                <tr>
-                    <th align="left">Email</th>
-                    <th>:</th>
-                    <td>{{ user?.email }}</td>
-                </tr>
+                <tbody>
+                    <tr>
+                        <th align="left">Username</th>
+                        <th>:</th>
+                        <td>{{ user?.username }}</td>
+                    </tr>
+                    <tr>
+                        <th align="left">Email</th>
+                        <th>:</th>
+                        <td>{{ user?.email }}</td>
+                    </tr>
+                </tbody>
             </table>
         </NCard>
     </div>
