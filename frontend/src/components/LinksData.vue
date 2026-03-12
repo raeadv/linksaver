@@ -53,24 +53,31 @@ onMounted(() => fetchLinks(() => { }))
     <div class="w-full">
         <input v-model="keyword" type="text" placeholder="Search links..."
             class="w-full mb-3 px-3 py-2 border rounded" />
-        <NInfiniteScroll :distance="100" @load="fetchLinks">
-            <div v-for="link in links" :key="link.ID" class="p-3 mb-2 border rounded">
-                <a :href="link.link" target="_blank" class="font-medium text-blue-600 hover:underline">
-                    {{ link.name || link.link }}
-                </a>
-                <p v-if="link.link_desc" class="text-sm text-gray-500 mt-1">{{ link.link_desc }}</p>
-                <div v-if="link.LinkTags && link.LinkTags.length" class="flex flex-wrap gap-1 mt-1">
-                    <span v-for="lt in link.LinkTags" :key="lt.TagId" class="text-xs bg-gray-100 px-2 py-0.5 rounded">{{
-                        lt.Tag?.name }}</span>
+        <div class="w-full p-4">
+            <NInfiniteScroll :distance="100" @load="fetchLinks">
+                <div class="grid grid-cols-3 gap-2">
+                    <div v-for="link in links" :key="link.ID"
+                        class="h-28 m-4 overflow-hidden p-3 border border-green-600 rounded cursor-pointer hover:scale-[101%] duration-150 delay-75 flex flex-col gap-1">
+                        <a :href="link.link" target="_blank"
+                            class="font-medium text-green-600 hover:underline hover:font-semibold duration-150 delay-75 truncate">
+                            {{ link.name || link.link }}
+                        </a>
+                        <p v-if="link.link_desc" class="text-sm text-gray-500 line-clamp-2">{{ link.link_desc }}</p>
+                        <div v-if="link.LinkTags && link.LinkTags.length" class="flex flex-wrap gap-1 overflow-hidden">
+                            <span v-for="lt in link.LinkTags" :key="lt.TagId"
+                                class="text-xs bg-gray-100 px-2 py-0.5 rounded">{{
+                                    lt.Tag?.name }}</span>
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-            <template #loading>
-                <div class="flex justify-center py-4">
-                    <NSpin size="small" />
-                </div>
-            </template>
-        </NInfiniteScroll>
+                <template #loading>
+                    <div class="flex justify-center py-4">
+                        <NSpin size="small" />
+                    </div>
+                </template>
+            </NInfiniteScroll>
+        </div>
 
         <div v-if="!hasMore && links.length === 0" class="text-center text-gray-400 py-8">
             No links found.
