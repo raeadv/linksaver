@@ -1,0 +1,15 @@
+[Unit]
+Description=Linksaver Go App
+After=network.target postgresql.service
+
+[Service]
+Type=simple
+User=raeadvent
+WorkingDirectory=/home/raeadvent/DEV/GO/linksaver
+EnvironmentFile=/home/raeadvent/DEV/GO/linksaver/.env
+ExecStart=/home/raeadvent/DEV/GO/linksaver/compiled/linkserver
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
