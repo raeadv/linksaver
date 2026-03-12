@@ -51,11 +51,11 @@ func main() {
 	}))
 
 	if mode == "production" {
-		g.Static("/assets", "./compiled/assets")
-		g.StaticFile("/favicon.ico", "./compiled/favicon.ico")
-		g.StaticFile("/", "./compiled/index.html")
+		g.Static("/assets", "./compiled/html/assets")
+		g.StaticFile("/favicon.ico", "./compiled/html/favicon.ico")
+		g.StaticFile("/", "./compiled/html/index.html")
 		g.NoRoute(func(c *gin.Context) {
-			c.File("./compiled/index.html")
+			c.File("./compiled/html/index.html")
 		})
 	}
 
