@@ -2,7 +2,7 @@
 import api from '@/net/api';
 import { NFormItem, NInput, NPagination, NSelect, NSpace, NTag } from 'naive-ui';
 import { onMounted, reactive, ref, watch } from 'vue';
-import debounce from 'lodash/debounce'
+const debounce = (fn, delay) => { let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), delay) } }
 
 
 const tagParameter = reactive({
