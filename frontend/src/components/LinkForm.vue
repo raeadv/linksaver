@@ -2,7 +2,7 @@
 import api from '@/net/api';
 import { appUtils } from '@/utils/app.utils';
 import { createFormRules } from '@/utils/validation.adapter';
-import { Add, Search } from '@vicons/ionicons5';
+import { Add, Save, Search } from '@vicons/ionicons5';
 import { NButton, NCard, NForm, NFormItem, NInput, NInputGroup, NModal, NSelect } from 'naive-ui';
 import { reactive, ref } from 'vue';
 import z from 'zod';
@@ -79,8 +79,8 @@ const handleGetUrlMeta = async () => {
 
 const schema = z.object({
     link: z.url({ message: "Must be valid url" }),
-    name: z.string().min(3, { message: 'minimal url name is 3 chars' }),
-    link_desc: z.string().nullable(),
+    name: z.string().min(3, { message: 'minimal url name is 3 chars' }).max(150, { message: 'Max Link Name is 150 chars' }),
+    link_desc: z.string().nullable().max(150, { message: 'Max Link Description is 200 chars' }),
     link_tags: z.array(z.any()).optional()
 })
 
@@ -139,9 +139,9 @@ const validateAndSaveLink = async (e) => {
                             value-field="ID" />
                     </NFormItem>
                     <NButton type="primary" @click="validateAndSaveLink">
-                        <span>Add Tag</span>
+                        <span>Save Link</span>
                         <template #icon>
-                            <Add />
+                            <Save />
                         </template>
                     </NButton>
                 </div>
