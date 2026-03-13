@@ -4,6 +4,7 @@ import { appUtils } from '@/utils/app.utils';
 import { Add } from '@vicons/ionicons5';
 import { NButton, NCard, NFormItem, NInput, NModal } from 'naive-ui';
 import { ref } from 'vue';
+import { ta } from 'zod/v4/locales';
 
 const showModal = ref(false)
 const tag = ref('')
@@ -11,6 +12,11 @@ const { message, loading } = appUtils()
 
 const addTag = async () => {
     if (!tag.value || String(tag.value).length < 1) {
+        return
+    }
+
+    if (String(tag.value) > 150) {
+        message.error("max tag name is 100 chars")
         return
     }
 
