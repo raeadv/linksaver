@@ -80,7 +80,7 @@ const handleGetUrlMeta = async () => {
 const schema = z.object({
     link: z.url({ message: "Must be valid url" }),
     name: z.string().min(3, { message: 'minimal url name is 3 chars' }).max(150, { message: 'Max Link Name is 150 chars' }),
-    link_desc: z.string().nullable().max(150, { message: 'Max Link Description is 200 chars' }),
+    link_desc: z.string().max(150, { message: 'Max Link Description is 200 chars' }).nullable(),
     link_tags: z.array(z.any()).optional()
 })
 
